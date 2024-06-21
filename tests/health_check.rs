@@ -1,5 +1,5 @@
+use sqlx::{Connection, PgConnection};
 use std::net::TcpListener;
-use sqlx::{PgConnection, Connection};
 use zero2prod::configuration::get_configuration;
 
 fn spawn_app() -> String {
