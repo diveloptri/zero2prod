@@ -21,7 +21,7 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - name: Check out repositoriy code
+      - name: check out repository code
         uses: actions/checkout@v3
 
       - name: Install Rust toolchain
@@ -33,11 +33,11 @@ jobs:
           key: sqlx-${{ env.SQLX_VERSION }}
 
       - name: Install sqlx-cli
-        run:
-          cargo install sqlx-cli
-          --version=${{ env.SQLX_VERSION }}
-          --features ${{ env.SQLX_FEATURES}}
-          --no-default-features
+        run: |
+          cargo install sqlx-cli \
+          --version=${{ env.SQLX_VERSION }} \
+          --features ${{ env.SQLX_FEATURES}} \
+          --no-default-features \
           --locked
       
       - name: Install postgresql-client
@@ -49,7 +49,7 @@ jobs:
           SKIP_DOCKER=true ./scripts/init_db.sh
 
       - name: Run tests
-        run: Cargo test
+        run: cargo test
 
   fmt:
     name: Rustfmt
