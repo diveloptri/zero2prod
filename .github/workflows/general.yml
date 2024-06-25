@@ -44,7 +44,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install postgresql-client -y
 
       - name: Migrate database
-        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        run: |
+          sudo apt-get install libpq-dev -y
+          SKIP_DOCKER=true ./scripts/init_db.sh
 
       - name: Run tests
         run: Cargo test
@@ -123,6 +125,8 @@ jobs:
           --no-default-features
           --locked
       - name: Migrate database
-        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        run: |
+          sudo apt-get install libpq-dev -y
+          SKIP_DOCKER=true ./scripts/init_db.sh
       - name: Generate code coverage
         run: cargo install cargo-tarpaulin && cargo tarpaulin --verbose --workspace
