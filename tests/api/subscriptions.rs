@@ -134,14 +134,13 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
 async fn subscribe_fails_if_there_is_a_fatal_database_error() {
     let app = spawn_app().await;
     let body = "name=storm%20tropper&email=le_tropper%40gmail.com";
-        
+
     sqlx::query!("ALTER TABLE subscription_tokens DROP COLUMN subscription_token;",)
         .execute(&app.db_pool)
         .await
         .unwrap();
 
     let response = app.post_subscriptions(body.into()).await;
-
 
     assert_eq!(response.status().as_u16(), 500);
 }
