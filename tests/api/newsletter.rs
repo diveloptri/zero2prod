@@ -30,8 +30,7 @@ async fn newsletter_returns_400_for_invalid_dat() {
             error_message
         );
     }
-} 
-
+}
 
 #[tokio::test]
 async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
@@ -68,7 +67,7 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
         .expect(1)
         .mount(&app.email_server)
         .await;
-            
+
     let newsletter_request_body = serde_json::json!({
         "title": "Awesome idee",
         "content": {

@@ -7,7 +7,7 @@ use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
 use crate::configuration::{DatabaseSettings, Settings};
-use crate::routes::{confirm, health_check, subscribe, publish_newsletter};
+use crate::routes::{confirm, health_check, publish_newsletter, subscribe};
 use sqlx::postgres::PgPoolOptions;
 
 pub struct Application {

@@ -130,7 +130,7 @@ pub async fn subscribe(
 
     send_confirmation_email(
         &email_client,
-        new_subscriber,
+        &new_subscriber,
         &base_url.0,
         &subscription_token,
     )
@@ -155,9 +155,10 @@ pub async fn store_token(
         subscription_token,
         subscriber_id
     );
-    transaction.execute(query).await.map_err(|e| {
-        StoreTokenError(e)
-    })?;
+    transaction
+        .execute(query)
+        .await
+        .map_err(|e| StoreTokenError(e))?;
     Ok(())
 }
 
@@ -167,7 +168,7 @@ pub async fn store_token(
 )]
 pub async fn send_confirmation_email(
     email_client: &EmailClient,
-    new_subscriber: NewSubscriber,
+    new_subscriber: &NewSubscriber,
     base_url: &str,
     subscription_token: &str,
 ) -> Result<(), reqwest::Error> {
@@ -189,7 +190,7 @@ pub async fn send_confirmation_email(
     );
 
     email_client
-        .send_email(new_subscriber.email, "Welcome", &html_body, plain_body)
+        .send_email(&new_subscriber.email, "Welcome", &html_body, plain_body)
         .await
 }
 
