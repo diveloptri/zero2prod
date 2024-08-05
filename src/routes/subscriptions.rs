@@ -140,7 +140,6 @@ pub async fn subscribe(
     Ok(HttpResponse::Ok().finish())
 }
 
-#[allow(clippy::redundant_closure)]
 #[tracing::instrument(
     name = "Store subscription token in the database",
     skip(subscription_token, transaction)
@@ -156,10 +155,7 @@ pub async fn store_token(
         subscription_token,
         subscriber_id
     );
-    transaction
-        .execute(query)
-        .await
-        .map_err(|e| StoreTokenError(e))?;
+    transaction.execute(query).await.map_err(StoreTokenError)?;
     Ok(())
 }
 
