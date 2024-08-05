@@ -140,6 +140,7 @@ pub async fn subscribe(
     Ok(HttpResponse::Ok().finish())
 }
 
+#[allow(clippy::redundant_closure)]
 #[tracing::instrument(
     name = "Store subscription token in the database",
     skip(subscription_token, transaction)
