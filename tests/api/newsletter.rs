@@ -81,6 +81,30 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
     assert_eq!(response.status().as_u16(), 200);
 }
 
+#[tokio::test]
+async fn request_missing_authorization_are_rejected() {
+    let app = spawn_app().await;
+
+    let response = reqwest::Client::new()
+        .post(&format!("{}/newsletters", &app.address))
+        .json(&serde_json::json!({
+            "title": "Awesome idee",
+            "content": {
+                "text": "Let me tell you about my awesome idee",
+                "html": "<p>Let me tell you about my awesome idee</p>",
+            }
+        }))
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    assert_eq!(401, response.status().as_u16());
+    assert_eq!(
+        r#"Basic realm="publish""#,
+        response.headers()["WWW-Authenticate"]
+    );
+}
+
 async fn create_unconfirmed_subscriber(app: &TestApp) -> ConfirmationLinks {
     let body = "name=storm%20tropper&email=le_tropper%40gmail.com";
 
