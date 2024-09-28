@@ -7,8 +7,8 @@ use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
 use crate::configuration::{DatabaseSettings, Settings};
-use crate::routes::home;
 use crate::routes::{confirm, health_check, publish_newsletter, subscribe};
+use crate::routes::{home, login, login_form};
 use sqlx::postgres::PgPoolOptions;
 
 pub struct Application {
@@ -81,6 +81,8 @@ pub fn run(
         App::new()
             .wrap(TracingLogger::default())
             .route("/", web::get().to(home))
+            .route("/login", web::get().to(login_form))
+            .route("/login", web::post().to(login))
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
             .route("/subscriptions/confirm", web::get().to(confirm))
