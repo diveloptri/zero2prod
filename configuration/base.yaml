@@ -1,6 +1,6 @@
 application:
   port: 8000
-  hmac_secret: "this-is-a-long-and-secret-example-key"
+  hmac_secret: "this-is-a-long-and-secret-example-key-which-has-to-be-greater-or-equal-to-64-bytes"
 database:
   host: "127.0.0.1"
   port: 5432
