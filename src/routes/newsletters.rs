@@ -7,7 +7,7 @@ use actix_web::HttpResponse;
 use actix_web::ResponseError;
 use anyhow::Context;
 use base64::Engine;
-use secrecy::Secret;
+use secrecy::SecretString;
 use sqlx::PgPool;
 
 use crate::domain::SubscriberEmail;
@@ -92,7 +92,7 @@ fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Erro
 
     Ok(Credentials {
         username,
-        password: Secret::new(password),
+        password: SecretString::from(password),
     })
 }
 
