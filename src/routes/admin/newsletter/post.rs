@@ -30,7 +30,7 @@ pub async fn publish_newsletter(
     email_client: web::Data<EmailClient>,
 ) -> Result<HttpResponse, actix_web::Error> {
     user_id.into_inner();
-    
+
     let subscribers = get_confirmed_subscribers(&pool).await.map_err(e500)?;
     for subscriber in subscribers {
         match subscriber {

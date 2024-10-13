@@ -14,10 +14,13 @@ use sqlx::PgPool;
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
-use crate::configuration::{DatabaseSettings, Settings};
-use crate::routes::{admin_dashboard, change_password, change_password_form, confirm, health_check, publish_newsletter, publish_newsletter_form, subscribe, log_out};
-use crate::routes::{home, login, login_form};
 use crate::authentication::reject_anonymous_users;
+use crate::configuration::{DatabaseSettings, Settings};
+use crate::routes::{
+    admin_dashboard, change_password, change_password_form, confirm, health_check, log_out,
+    publish_newsletter, publish_newsletter_form, subscribe,
+};
+use crate::routes::{home, login, login_form};
 
 pub struct Application {
     port: u16,

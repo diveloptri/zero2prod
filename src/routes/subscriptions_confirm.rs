@@ -24,13 +24,11 @@ impl std::fmt::Debug for ConfirmationError {
 }
 
 impl ResponseError for ConfirmationError {
-
     fn status_code(&self) -> StatusCode {
         match self {
             Self::UnknownToken => StatusCode::UNAUTHORIZED,
             Self::UnexpectedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
-        
     }
 }
 
@@ -40,9 +38,9 @@ pub async fn confirm(
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, ConfirmationError> {
     let subscriber_id = get_subscriber_id_from_token(&pool, &parameters.subscription_token)
-    .await
-    .context("Failed to retrieve the subscriber id associated with the provided token.")?
-    .ok_or(ConfirmationError::UnknownToken)?;
+        .await
+        .context("Failed to retrieve the subscriber id associated with the provided token.")?
+        .ok_or(ConfirmationError::UnknownToken)?;
 
     confirm_subscriber(&pool, subscriber_id)
         .await

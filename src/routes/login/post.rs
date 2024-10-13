@@ -1,7 +1,7 @@
 use actix_web::error::InternalError;
 use actix_web::http::header::LOCATION;
-use actix_web::HttpResponse;
 use actix_web::web;
+use actix_web::HttpResponse;
 use secrecy::SecretString;
 use sqlx::PgPool;
 

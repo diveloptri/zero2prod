@@ -1,18 +1,18 @@
-use actix_web::{HttpResponse, web};
-use secrecy::SecretString;
-use secrecy::ExposeSecret;
+use actix_web::{web, HttpResponse};
 use actix_web_flash_messages::FlashMessage;
+use secrecy::ExposeSecret;
+use secrecy::SecretString;
 use sqlx::PgPool;
 
-use crate::utils::{e500, see_other};
-use crate::routes::admin::dashboard::get_username;
 use crate::authentication::{validate_credentials, AuthError, Credentials, UserId};
+use crate::routes::admin::dashboard::get_username;
+use crate::utils::{e500, see_other};
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
     current_password: SecretString,
     new_password: SecretString,
-    new_password_check: SecretString
+    new_password_check: SecretString,
 }
 
 pub async fn change_password(
@@ -24,7 +24,7 @@ pub async fn change_password(
 
     if form.new_password.expose_secret() != form.new_password_check.expose_secret() {
         FlashMessage::error(
-        "You entered two different new passwords - the field values must match."
+            "You entered two different new passwords - the field values must match.",
         )
         .send();
         return Ok(see_other("/admin/password"));
@@ -52,4 +52,3 @@ pub async fn change_password(
     FlashMessage::error("Your password has been changed.").send();
     Ok(see_other("/admin/password"))
 }
-

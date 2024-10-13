@@ -1,4 +1,3 @@
-
 use actix_web::http::header::ContentType;
 use actix_web::HttpResponse;
 use actix_web_flash_messages::IncomingFlashMessages;
@@ -53,5 +52,5 @@ pub async fn publish_newsletter_form(
     <p><a href="/admin/dashboard">&lt;- Back</a></p>
 </body>
 </html>"#
-    )))
+        )))
 }

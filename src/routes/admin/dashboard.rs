@@ -1,9 +1,12 @@
-use actix_web::{http::header::{ContentType, LOCATION}, web, HttpResponse};
+use crate::session_state::TypedSession;
+use crate::utils::e500;
+use actix_web::{
+    http::header::{ContentType, LOCATION},
+    web, HttpResponse,
+};
 use anyhow::Context;
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::session_state::TypedSession;
-use crate::utils::e500;
 
 pub async fn admin_dashboard(
     session: TypedSession,
@@ -13,7 +16,7 @@ pub async fn admin_dashboard(
         get_username(user_id, &pool).await.map_err(e500)?
     } else {
         return Ok(HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/login")) 
+            .insert_header((LOCATION, "/login"))
             .finish());
     };
 
