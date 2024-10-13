@@ -27,6 +27,7 @@ pub struct EmailClientSettings {
     pub base_url: String,
     pub sender_email: String,
     pub authorization_token: SecretString,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub timeout_milliseconds: u64,
 }
 
@@ -101,14 +102,14 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 
 pub enum Environment {
     Local,
-    Producation,
+    Production,
 }
 
 impl Environment {
     pub fn as_str(&self) -> &'static str {
         match self {
             Environment::Local => "local",
-            Environment::Producation => "production",
+            Environment::Production => "production",
         }
     }
 }
@@ -119,7 +120,7 @@ impl TryFrom<String> for Environment {
     fn try_from(s: String) -> Result<Self, Self::Error> {
         match s.to_lowercase().as_str() {
             "local" => Ok(Self::Local),
-            "production" => Ok(Self::Producation),
+            "production" => Ok(Self::Production),
             other => Err(format!(
                 "{} is not a supported environment. \
                 Use either 'local' or 'production'.

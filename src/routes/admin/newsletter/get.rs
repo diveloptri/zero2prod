@@ -1,18 +1,12 @@
+
 use actix_web::http::header::ContentType;
 use actix_web::HttpResponse;
 use actix_web_flash_messages::IncomingFlashMessages;
 use std::fmt::Write;
-use crate::session_state::TypedSession;
-use crate::utils::{e500, see_other};
 
-pub async fn change_password_form(
-    session: TypedSession,
+pub async fn publish_newsletter_form(
     flash_messages: IncomingFlashMessages,
 ) -> Result<HttpResponse, actix_web::Error> {
-    if session.get_user_id().map_err(e500)?.is_none() {
-        return Ok(see_other("/login"));
-    };
-
     let mut msg_html = String::new();
     for m in flash_messages.iter() {
         writeln!(msg_html, "<p><i>{}</i></p>", m.content()).unwrap();
@@ -31,20 +25,30 @@ pub async fn change_password_form(
 </head>
 <body>
     {msg_html}
-    <form action="/admin/password" method="post">
-        <label for="cpassword">Current password
-            <input type="password" placeholder="Enter current password" name="cpassword">
+    <form action="/admin/newsletters" method="post">
+        <label for="title">Title:<br>
+            <input type="text" placeholder="Enter the issue title" name="title">
         </label>
         <br>
-        <label for="npassword">New password
-            <input type="password" placeholder="Enter new password" name="npassword">
+        <label for="text_content">Plain text content:<br>
+            <textarea
+                placeholder="Enter the content in plain text"
+                name="text_content"
+                rows="20"
+                cols="50"
+            ></textarea>
         </label>
         <br>
-        <label for="new_password_check">Confirm new password
-            <input type="password" placeholder="Type the new password again" name="new_password_check">
+        <label for="html_content">HTML content:<br>
+            <textarea
+                placeholder="Enter the content in HTML format"
+                name="html_content"
+                rows="20"
+                cols="50"
+            ></textarea>
         </label>
         <br>
-        <button type="submit">Change password</button>
+        <button type="submit">Publish</button>
     </form>
     <p><a href="/admin/dashboard">&lt;- Back</a></p>
 </body>

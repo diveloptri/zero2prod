@@ -18,13 +18,13 @@ pub struct FormData {
 pub async fn change_password(
     form: web::Form<FormData>,
     pool: web::Data<PgPool>,
-    user_id: web::ReqData<UserId>
+    user_id: web::ReqData<UserId>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user_id = user_id.into_inner();
 
     if form.new_password.expose_secret() != form.new_password_check.expose_secret() {
         FlashMessage::error(
-        "You entered two different passwords - the field values must match."
+        "You entered two different new passwords - the field values must match."
         )
         .send();
         return Ok(see_other("/admin/password"));
@@ -33,7 +33,7 @@ pub async fn change_password(
 
     let credentials = Credentials {
         username,
-        password: form.0.current_password
+        password: form.0.current_password,
     };
 
     if let Err(e) = validate_credentials(credentials, &pool).await {
@@ -42,8 +42,8 @@ pub async fn change_password(
                 FlashMessage::error("The current password is incorrect.").send();
                 Ok(see_other("/admin/password"))
             }
-            AuthError::UnexpectedError(_) => Err(e500(e).into())
-        }
+            AuthError::UnexpectedError(_) => Err(e500(e)),
+        };
     }
     crate::authentication::change_password(*user_id, form.0.new_password, &pool)
         .await
