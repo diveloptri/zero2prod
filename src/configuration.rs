@@ -1,4 +1,6 @@
 use crate::domain::SubscriberEmail;
+use crate::email_client::EmailClient;
+
 use secrecy::ExposeSecret;
 use secrecy::SecretString;
 use serde_aux::field_attributes::deserialize_number_from_string;
@@ -32,6 +34,17 @@ pub struct EmailClientSettings {
 }
 
 impl EmailClientSettings {
+    pub fn client(self) -> EmailClient {
+        let sender_email = self.sender().expect("Invalid sender email address");
+        let timeout = self.timeout();
+        EmailClient::new(
+            self.base_url,
+            sender_email,
+            self.authorization_token,
+            timeout,
+        )
+    }
+
     pub fn sender(&self) -> Result<SubscriberEmail, String> {
         SubscriberEmail::parse(self.sender_email.clone())
     }
@@ -53,7 +66,7 @@ pub struct DatabaseSettings {
 }
 
 impl DatabaseSettings {
-    pub fn without_db(&self) -> PgConnectOptions {
+    pub fn connect_options(&self) -> PgConnectOptions {
         let ssl_mode = if self.require_ssl {
             PgSslMode::Require
         } else {
@@ -65,10 +78,7 @@ impl DatabaseSettings {
             .password(self.password.expose_secret())
             .port(self.port)
             .ssl_mode(ssl_mode)
-    }
-
-    pub fn with_db(&self) -> PgConnectOptions {
-        self.without_db().database(&self.database_name)
+            .database(&self.database_name)
     }
 }
 

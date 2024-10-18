@@ -1,10 +1,14 @@
 use argon2::password_hash::SaltString;
 use argon2::{Algorithm, Argon2, Params, PasswordHasher, Version};
 use once_cell::sync::Lazy;
+use secrecy::SecretString;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use wiremock::MockServer;
+
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use zero2prod::email_client::EmailClient;
+use zero2prod::issue_delivery_worker::{try_execute_task, ExecutionOutcome};
 use zero2prod::startup::{get_connection_pool, Application};
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
 
@@ -28,6 +32,7 @@ pub struct TestApp {
     pub email_server: MockServer,
     pub test_user: TestUser,
     pub api_client: reqwest::Client,
+    pub email_client: EmailClient,
 }
 
 pub struct ConfirmationLinks {
@@ -36,6 +41,17 @@ pub struct ConfirmationLinks {
 }
 
 impl TestApp {
+    pub async fn dispatch_all_pending_emails(&self) {
+        loop {
+            if let ExecutionOutcome::EmptyQueue =
+                try_execute_task(&self.db_pool, &self.email_client)
+                    .await
+                    .unwrap()
+            {
+                break;
+            }
+        }
+    }
     pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
         self.api_client
             .post(&format!("{}/subscriptions", &self.address))
@@ -191,30 +207,35 @@ pub async fn spawn_app() -> TestApp {
     let test_app = TestApp {
         address: format!("http://127.0.0.1:{}", application_port),
         port: application_port,
-        db_pool: get_connection_pool(&configuration.database)
-            .await
-            .expect("Failed to connect to the database"),
+        db_pool: get_connection_pool(&configuration.database),
         email_server,
         test_user: TestUser::generate(),
         api_client: client,
+        email_client: configuration.email_client.client(),
     };
     test_app.test_user.store(&test_app.db_pool).await;
     test_app
 }
 
 async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect_with(&config.without_db())
+    let maintenance_settings = DatabaseSettings {
+        database_name: "postgres".to_string(),
+        username: "postgres".to_string(),
+        password: SecretString::from("password".to_string()),
+        ..config.clone()
+    };
+    let mut connection = PgConnection::connect_with(&maintenance_settings.connect_options())
         .await
-        .expect("Failed to connecto to Postgres");
+        .expect("Failed to connect to Postgres");
 
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
         .await
-        .expect("Failed to create Database");
+        .expect("Failed to create database");
 
-    let connection_pool = PgPool::connect_with(config.with_db())
+    let connection_pool = PgPool::connect_with(config.connect_options())
         .await
-        .expect("Failed to connecto to Postgres.");
+        .expect("Failed to connect to Postgres.");
 
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
@@ -225,7 +246,7 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
 }
 
 pub struct TestUser {
-    pub user_id: Uuid,
+    user_id: Uuid,
     pub username: String,
     pub password: String,
 }
